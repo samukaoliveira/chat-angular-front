@@ -12,6 +12,7 @@ import { Conversa } from 'src/app/models/conversa';
 export class ConversaService {
 
   private apiUrl = 'http://localhost:8080/conversas';
+  private usuariosApiUrl = 'http://localhost:8080/usuarios';
 
   constructor(private http: HttpClient) {}
 
@@ -25,6 +26,10 @@ export class ConversaService {
     return this.http.get<Usuario[]>(
       `${this.apiUrl}/listar`
     );
+  }
+
+  listarUsuariosDisponiveis(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.usuariosApiUrl}/listar`);
   }
 
   pesquisarConversasPorNome(nomeUsuario: string): Observable<Usuario[]> {

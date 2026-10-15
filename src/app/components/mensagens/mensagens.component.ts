@@ -1,19 +1,21 @@
-import { Conversa } from '../../models/conversa';
 import { Usuario } from '../../models/usuario';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { MensagensService } from './mensagens.service';
 import { Mensagem } from 'src/app/models/mensagem';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MensagensWebsocketService } from './mensagens-websocket.service';
+import { ConversaService } from '../conversas/conversas.service';
 
 @Component({
-  selector: 'app-conversas',
+  selector: 'app-mensagens',
   templateUrl: './mensagens.component.html',
   styleUrls: ['./mensagens.component.scss']
 })
 export class MensagensComponent implements OnInit, OnDestroy {
+
+  @ViewChild('messageList') messageList!: ElementRef<HTMLDivElement>;
 
   usuario!: Usuario;
 
@@ -29,7 +31,8 @@ export class MensagensComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private mensagensService: MensagensService,
-    private mensagensWebsocket: MensagensWebsocketService
+    private mensagensWebsocket: MensagensWebsocketService,
+    private conversaService: ConversaService
   ) {}
 
   ngOnInit(): void {
@@ -54,11 +57,19 @@ export class MensagensComponent implements OnInit, OnDestroy {
     .subscribe({
       next: mensagens => {
         this.mensagens = mensagens;
+        this.rolarParaUltimaMensagem();
 
         const participantes = mensagens[0]?.conversa?.usuarios ?? [];
         const outro = participantes.find(u => u.id === this.usuarioId);
         if (outro) {
           this.usuario = outro;
+        }
+
+        if (!this.usuario) {
+          this.conversaService.listarConversas().subscribe({
+            next: usuarios => this.usuario = usuarios.find(u => u.id === this.usuarioId) as Usuario,
+            error: erro => console.error('Erro ao carregar contato:', erro)
+          });
         }
 
         const conversaId = mensagens[0]?.conversa?.id;
@@ -74,6 +85,15 @@ export class MensagensComponent implements OnInit, OnDestroy {
 
   formatarHora(data: string){
     return this.mensagensService.formatarHora(data);
+  }
+
+  isMinhaMensagem(mensagem: Mensagem): boolean {
+    return mensagem.senderId !== this.usuarioId;
+  }
+
+  iniciais(nome: string): string {
+    return nome.split(' ').filter(parte => parte.length > 0).slice(0, 2)
+      .map(parte => parte.charAt(0)).join('').toLocaleUpperCase();
   }
 
   enviar(){
@@ -100,6 +120,7 @@ export class MensagensComponent implements OnInit, OnDestroy {
       return;
     }
     this.mensagens = [...this.mensagens, mensagem];
+    this.rolarParaUltimaMensagem();
   }
 
   private iniciarAtualizacoesEmTempoReal(conversaId: number): void {
@@ -107,5 +128,14 @@ export class MensagensComponent implements OnInit, OnDestroy {
     this.mensagensRealtimeSubscription = this.mensagensWebsocket
       .escutarConversa(conversaId)
       .subscribe(mensagem => this.adicionarMensagem(mensagem));
+  }
+
+  private rolarParaUltimaMensagem(): void {
+    setTimeout(() => {
+      if (this.messageList) {
+        const elemento = this.messageList.nativeElement;
+        elemento.scrollTop = elemento.scrollHeight;
+      }
+    });
   }
 }

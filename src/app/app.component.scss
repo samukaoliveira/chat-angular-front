@@ -1,0 +1,35 @@
+.current-user {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  margin-right: 3px;
+  color: #1c1e21;
+}
+
+.current-user-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e7f3ff;
+  color: #0866ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.current-user-name {
+  overflow: hidden;
+  max-width: 180px;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .current-user { gap: 6px; }
+  .current-user-name { max-width: 100px; font-size: 12px; }
+}

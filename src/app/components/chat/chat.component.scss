@@ -1,0 +1,87 @@
+.messenger-layout {
+  display: flex;
+  height: calc(100vh - 64px);
+  min-height: 420px;
+  background: #fff;
+  color: #1c1e21;
+}
+
+.sidebar {
+  flex: 0 0 350px;
+  min-width: 290px;
+  border-right: 1px solid #e4e6eb;
+}
+
+.conversation-area {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.welcome-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  color: #65676b;
+}
+
+.welcome-icon {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e7f3ff;
+  color: #0084ff;
+}
+
+.welcome-icon mat-icon {
+  width: 34px;
+  height: 34px;
+  font-size: 34px;
+}
+
+.welcome-panel h1 {
+  margin: 0 0 8px;
+  color: #1c1e21;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.welcome-panel p {
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .messenger-layout {
+    height: calc(100vh - 56px);
+    min-height: 0;
+  }
+
+  .sidebar {
+    flex: 1 1 100%;
+    min-width: 0;
+    border-right: 0;
+  }
+
+  .conversation-area {
+    display: none;
+  }
+
+  .conversation-open .sidebar {
+    display: none;
+  }
+
+  .conversation-open .conversation-area {
+    display: flex;
+    flex: 1;
+  }
+}

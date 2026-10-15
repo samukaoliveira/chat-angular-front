@@ -11,19 +11,26 @@ import { MatIconModule } from '@angular/material/icon';
 export class AppComponent {
   title = 'samchat';
 
-   constructor(
-    private AuthService: AuthService,
+  constructor(
+    private authService: AuthService,
     private router: Router
-  ){
-
-  }
+  ) {}
 
   logout() {
-    this.AuthService.logout();
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 
   logado(): boolean {
-    return this.AuthService.logado();
+    return this.authService.logado();
+  }
+
+  nomeUsuario(): string {
+    return this.authService.getNomeUsuario();
+  }
+
+  iniciaisUsuario(): string {
+    return this.nomeUsuario().split(' ').filter(parte => parte.length > 0).slice(0, 2)
+      .map(parte => parte.charAt(0)).join('').toLocaleUpperCase();
   }
 }

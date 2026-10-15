@@ -1,22 +1,78 @@
-<div class="conversas">
-
-
-  <h2>Conversas</h2>
-
-  <div class="conversa">
-
-    <div class="usuario"
-      *ngFor="let usuario of usuarios">
-
-      <div class="conteudo" [routerLink]="['/mensagens', usuario.id]">
-        <span>{{ usuario.nome }}</span>
-      </div>
-
+<section class="conversation-list">
+  <header class="list-header">
+    <div class="title-row">
+      <h1>Conversas</h1>
+      <button class="message-mark" type="button" (click)="abrirSeletorDeUsuarios()"
+        aria-label="Adicionar conversa" title="Adicionar conversa">
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
+    <label class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="search" [(ngModel)]="busca" placeholder="Pesquisar no chat" aria-label="Pesquisar conversas">
+    </label>
+  </header>
 
+  <div class="picker-backdrop" *ngIf="adicionandoConversa" (click)="fecharSeletorDeUsuarios()">
+    <section class="contact-picker" role="dialog" aria-modal="true"
+      aria-labelledby="contact-picker-title" (click)="$event.stopPropagation()">
+      <header class="picker-header">
+        <div>
+          <h2 id="contact-picker-title">Nova conversa</h2>
+          <p>Escolha alguém para iniciar um chat.</p>
+        </div>
+        <button class="close-picker" type="button" (click)="fecharSeletorDeUsuarios()"
+          aria-label="Fechar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </header>
+
+      <label class="search-box picker-search">
+        <mat-icon>search</mat-icon>
+        <input type="search" [(ngModel)]="buscaNovoContato"
+          placeholder="Buscar por nome ou e-mail" aria-label="Buscar usuário">
+      </label>
+
+      <div class="available-users">
+        <button class="available-user" type="button"
+          *ngFor="let usuario of usuariosDisponiveis" (click)="iniciarConversa(usuario)">
+          <span class="avatar">{{ iniciais(usuario.nome) }}</span>
+          <span class="available-user-copy">
+            <span class="person-name">{{ usuario.nome }}</span>
+            <span class="last-message">{{ usuario.email }}</span>
+          </span>
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+        <p class="picker-empty" *ngIf="!carregandoUsuariosDisponiveis && !erroAoCarregarUsuarios && usuariosDisponiveis.length === 0">
+          Nenhum usuário encontrado.
+        </p>
+        <p class="picker-empty" *ngIf="carregandoUsuariosDisponiveis">Carregando usuários…</p>
+        <p class="picker-empty" *ngIf="erroAoCarregarUsuarios">Não foi possível carregar os usuários.</p>
+      </div>
+      <p class="picker-note">Se ainda não houver conversa, ela será criada ao enviar a primeira mensagem.</p>
+    </section>
   </div>
 
+  <div class="list-caption">MENSAGENS</div>
 
-</div>
+  <nav class="conversation-items" aria-label="Lista de conversas">
+    <a class="conversation-item"
+      *ngFor="let usuario of usuariosFiltrados"
+      [routerLink]="['/conversas/mensagens', usuario.id]"
+      routerLinkActive="selected">
+      <span class="avatar">{{ iniciais(usuario.nome) }}</span>
+      <span class="conversation-copy">
+        <span class="person-name">{{ usuario.nome }}</span>
+        <span class="last-message">Selecione para conversar</span>
+      </span>
+      <mat-icon class="chevron">chevron_right</mat-icon>
+    </a>
+  </nav>
 
-
+  <div class="list-state" *ngIf="carregando">Carregando conversas…</div>
+  <div class="list-state" *ngIf="!carregando && erroAoCarregar">Não foi possível carregar as conversas.</div>
+  <div class="list-state" *ngIf="!carregando && !erroAoCarregar && usuariosFiltrados.length === 0">
+    {{ busca ? 'Nenhum contato encontrado.' : 'Nenhum contato disponível.' }}
+  </div>
+</section>

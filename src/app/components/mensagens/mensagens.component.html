@@ -1,37 +1,41 @@
-<div class="conversas">
+<section class="conversation-panel">
+  <header class="conversation-header">
+    <a class="back-button" routerLink="/conversas" aria-label="Voltar para conversas">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <span class="avatar" *ngIf="usuario">{{ iniciais(usuario.nome) }}</span>
+    <div class="contact-info">
+      <h2>{{ usuario?.nome || 'Conversa' }}</h2>
+      <span>Mensagens</span>
+    </div>
+    <div class="header-actions" aria-hidden="true">
+      <mat-icon>info_outline</mat-icon>
+    </div>
+  </header>
 
-
-  <h2>Conversas</h2>
-
-  <div class="conversa">
-
-    <div class="usuario">
-      <span *ngIf="usuario">{{ usuario.nome }}</span>
-      <a routerLink="/conversas">
-        <mat-icon>close</mat-icon>
-      </a>
+  <div class="message-list" #messageList aria-live="polite">
+    <div class="conversation-start" *ngIf="mensagens.length === 0">
+      <span class="large-avatar" *ngIf="usuario">{{ iniciais(usuario.nome) }}</span>
+      <strong>{{ usuario?.nome || 'Nova conversa' }}</strong>
+      <span>Envie uma mensagem para começar esta conversa.</span>
     </div>
 
-    <div class="mensagem"
-    *ngFor="let mensagem of mensagens">
-
-      <div class="conteudo">
-        <span>{{ mensagem.conteudo }}</span>
+    <div class="message-row" *ngFor="let mensagem of mensagens"
+      [class.mine]="isMinhaMensagem(mensagem)">
+      <div class="message-bubble">
+        <span class="message-text">{{ mensagem.conteudo }}</span>
+        <time>{{ formatarHora(mensagem.horaEnvio) }}</time>
       </div>
-      <div class="horaEnvio">
-        <span>{{ formatarHora(mensagem.horaEnvio) }}</span>
-      </div>
-
     </div>
-
-
   </div>
 
-  <div class="envio">
-    <input type="text" name="novaMensagem"
-      id="novaMensagem"
-      [(ngModel)]="novaMensagem"/>
-    <button type="button" class="enviar" (click)="enviar()"><mat-icon>send</mat-icon></button>
-  </div>
-
-</div>
+  <form class="composer" (ngSubmit)="enviar()">
+    <input type="text" name="novaMensagem" [(ngModel)]="novaMensagem"
+      placeholder="Digite uma mensagem…" autocomplete="off"
+      aria-label="Digite uma mensagem"
+      (keydown.enter)="$event.preventDefault(); enviar()">
+    <button type="submit" [disabled]="!novaMensagem.trim()" aria-label="Enviar mensagem">
+      <mat-icon>send</mat-icon>
+    </button>
+  </form>
+</section>

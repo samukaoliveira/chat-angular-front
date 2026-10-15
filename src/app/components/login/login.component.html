@@ -1,24 +1,25 @@
-<div class="conteudo">
+<main class="login-page">
+  <section class="login-card" aria-labelledby="login-title">
+    <div class="login-brand-mark"><mat-icon>forum</mat-icon></div>
+    <p class="eyebrow">SAMCHAT</p>
+    <h1 id="login-title">Boas-vindas</h1>
+    <p class="login-description">Entre para conversar com seus contatos.</p>
 
-  <<mat-card class="title" appearance="outlined">
-    <mat-card-header>
-      <div mat-card-avatar class="example-header-image"></div>
-      <mat-card-title><h1>Login</h1></mat-card-title>
-      <mat-card-subtitle>
-        <span class="subtitle"><hr></span>
-        <span class="subtitle"><p>Realize o login</p></span>
-        <span class="subtitle"><hr></span>
-      </mat-card-subtitle>
-    </mat-card-header>
-  </mat-card>
+    <form class="login-form" (ngSubmit)="login()">
+      <div class="error-message" *ngIf="message" role="alert">{{ message }}</div>
 
-  <mat-card class="form-login" appearance="outlined">
-    <form (ngSubmit)="login()">
-      <span>{{message}}</span>
-      <input type="text" [(ngModel)]="email" name="email" placeholder="Email">
-      <input type="password" [(ngModel)]="senha" name="senha" placeholder="Senha">
-      <button type="submit">Entrar</button>
+      <label for="email">E-mail</label>
+      <input id="email" type="email" [(ngModel)]="email" name="email"
+        placeholder="voce@exemplo.com" autocomplete="username" required>
+
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" [(ngModel)]="senha" name="senha"
+        placeholder="Digite sua senha" autocomplete="current-password" required>
+
+      <button type="submit">
+        Entrar
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
     </form>
-  </mat-card>>
-
-</div>
+  </section>
+</main>

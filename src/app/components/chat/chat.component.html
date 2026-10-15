@@ -1,1 +1,14 @@
-<p>chat works!</p>
+<div class="messenger-layout" [class.conversation-open]="conversaSelecionada">
+  <aside class="sidebar">
+    <app-conversas></app-conversas>
+  </aside>
+
+  <main class="conversation-area">
+    <router-outlet></router-outlet>
+    <section class="welcome-panel" *ngIf="!conversaSelecionada">
+      <div class="welcome-icon"><mat-icon>forum</mat-icon></div>
+      <h1>Suas mensagens</h1>
+      <p>Escolha uma conversa para continuar ou inicie uma nova.</p>
+    </section>
+  </main>
+</div>
