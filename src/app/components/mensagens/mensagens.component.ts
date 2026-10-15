@@ -1,17 +1,19 @@
 import { Conversa } from '../../models/conversa';
 import { Usuario } from '../../models/usuario';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { MensagensService } from './mensagens.service';
 import { Mensagem } from 'src/app/models/mensagem';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { MensagensWebsocketService } from './mensagens-websocket.service';
 
 @Component({
   selector: 'app-conversas',
   templateUrl: './mensagens.component.html',
   styleUrls: ['./mensagens.component.scss']
 })
-export class MensagensComponent implements OnInit {
+export class MensagensComponent implements OnInit, OnDestroy {
 
   usuario!: Usuario;
 
@@ -21,13 +23,29 @@ export class MensagensComponent implements OnInit {
 
   novaMensagem = '';
 
-  constructor(private route: ActivatedRoute, private mensagensService: MensagensService) {}
+  private routeSubscription: Subscription | null = null;
+  private mensagensRealtimeSubscription: Subscription | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private mensagensService: MensagensService,
+    private mensagensWebsocket: MensagensWebsocketService
+  ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.routeSubscription = this.route.paramMap.subscribe(params => {
+      this.mensagensWebsocket.encerrarConversa();
+      this.mensagensRealtimeSubscription?.unsubscribe();
+      this.mensagens = [];
       this.usuarioId = Number(params.get('usuarioId'));
       this.carregarConversas();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSubscription?.unsubscribe();
+    this.mensagensRealtimeSubscription?.unsubscribe();
+    this.mensagensWebsocket.encerrarConversa();
   }
 
   carregarConversas(): void {
@@ -42,6 +60,11 @@ export class MensagensComponent implements OnInit {
         if (outro) {
           this.usuario = outro;
         }
+
+        const conversaId = mensagens[0]?.conversa?.id;
+        if (conversaId) {
+          this.iniciarAtualizacoesEmTempoReal(conversaId);
+        }
       },
       error: erro => {
         console.error('Erro ao carregar mensagens:', erro.status, erro.error);
@@ -55,16 +78,34 @@ export class MensagensComponent implements OnInit {
 
   enviar(){
 
-    const conteudo = this.novaMensagem;
+    const conteudo = this.novaMensagem.trim();
     if (!conteudo) return;
 
     this.mensagensService.enviar(conteudo, this.usuarioId)
       .subscribe({
         next: mensagem => {
-          this.carregarConversas();
+          const conversaId = mensagem.conversa?.id;
+          if (conversaId && !this.mensagensRealtimeSubscription) {
+            this.iniciarAtualizacoesEmTempoReal(conversaId);
+          }
+          this.adicionarMensagem(mensagem);
           this.novaMensagem = '';
         },
         error: erro => console.error('Erro ao enviar', erro.status, erro.error)
       });
+  }
+
+  private adicionarMensagem(mensagem: Mensagem): void {
+    if (this.mensagens.some(atual => atual.id === mensagem.id)) {
+      return;
+    }
+    this.mensagens = [...this.mensagens, mensagem];
+  }
+
+  private iniciarAtualizacoesEmTempoReal(conversaId: number): void {
+    this.mensagensRealtimeSubscription?.unsubscribe();
+    this.mensagensRealtimeSubscription = this.mensagensWebsocket
+      .escutarConversa(conversaId)
+      .subscribe(mensagem => this.adicionarMensagem(mensagem));
   }
 }
